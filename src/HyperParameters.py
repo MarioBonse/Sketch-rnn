@@ -8,12 +8,13 @@ class hyper_parameters():
         self.data_location = self.data_folder+self.data_name
         # NN parameters
         self.latent_dim = 256 
+        self.input_dimention = 5
         self.enc_hidden_size = 256
         self.dec_hidden_size = 512 
         self.Nz = 128
         self.M = 20
         self.rec_dropout = 0.9
-        self.batch_size = 128
+        self.batch_size = 100
         self.eta_min = 0.01
         self.R = 0.99995
         self.KL_min = 0.2
