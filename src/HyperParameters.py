@@ -25,4 +25,6 @@ class hyper_parameters():
         self.grad_clip = 1.
         self.temperature = 0.4
         self.max_seq_length = 200
+
+
 HP = hyper_parameters()
