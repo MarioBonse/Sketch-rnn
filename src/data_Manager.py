@@ -1,0 +1,97 @@
+import urllib.request
+import glob
+import os
+import numpy as np
+from HyperParameters import HP
+import tensorflow as tf
+
+class Data():
+  # managing the data
+  def __init__(self):
+    'Initialization'
+    # first load the data
+    self.loadData()
+    self.dim = HP.input_dimention
+    self.batch_size = HP.batch_size
+    self.train = self.purify(self.train)
+    self.valid = self.purify(self.valid)
+    self.test = self.purify(self.test)
+    self.train = self.normalize(self.train)
+    self.valid = self.normalize(self.valid)
+    self.test = self.normalize(self.test)
+
+    
+  def loadData(self):  
+    npzFile = np.load(HP.data_location, allow_pickle=True, encoding='latin1')
+    self.train = npzFile['train']
+    self.trainDimention = len(self.train)
+    self.test = npzFile['test']
+    self.valid = npzFile['valid']
+    return self.train, self.valid, self.test
+
+  # Normalize input Dx, Dy. We only remove the std as explained in the paper
+  def calculate_normalizing_scale_factor(self, strokes):
+      data = []
+      for element in strokes:
+          for point in element:
+              data.append(point[0])
+              data.append(point[1])
+      return np.std(np.array(data))
+
+  def normalize(self, strokes):
+      data = []
+      scale_factor = self.calculate_normalizing_scale_factor(strokes)
+      for seq in strokes:
+          seq[:, 0:1] /= scale_factor
+          data.append(seq)
+      return data
+
+  def purify(self, strokes):
+      # We have to remove too long sequence 
+      data = []
+      for seq in strokes:
+          if seq.shape[0] <= HP.max_seq_length:
+            len_seq = len(seq[:,0])
+            # pen state made by 3 state
+            new_seq = np.zeros((HP.max_seq_length,5))
+            new_seq[:len_seq,:2] = seq[:,:2]
+            new_seq[:len_seq-1,2] = 1-seq[:-1,2]
+            new_seq[:len_seq,3] = seq[:,2]
+            new_seq[(len_seq-1):,4] = 1
+            new_seq[len_seq-1,2:4] = 0
+            new_seq[len_seq-1,4] = 1
+            data.append(new_seq)
+      return data
+
+class DataGenerator(tf.keras.utils.Sequence):
+    'Generates data for Keras'
+    def __init__(self, Data, shuffle=True):
+        'Initialization'
+        self.Data = Data
+        self.shuffle = shuffle
+        self.on_epoch_end()
+
+    def __len__(self):
+        'Denotes the number of batches per epoch'
+        return int(np.floor(len(self.Data.trainDimention) / self.Data.batch_size))
+
+    def __getitem__(self, index):
+        'Generate one batch of data'
+        # Generate indexes of the batch
+        indexes = self.indexes[index*self.Data.batch_size:(index+1)*self.Data.batch_size]
+        data = self.Data.train[indexes]
+        return self.dataAugmentation(data)
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        self.indexes = np.arange(self.Data.trainDimention)
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+
+    def dataAugmentation(self, strokes):
+      randomx = np.random.rand()*(0.1)+1.
+      randomy = np.random.rand()*(0.1)+1.
+      for data in strokes:
+        data[:,1] = data[:,1]*randomx
+        data[:,2] = data[:,2]*randomy
+      return data

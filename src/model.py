@@ -3,10 +3,8 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import tensorflow as tf
-from keras import backend as K  
-from .data import load_data, normalize
-from .HyperParameters import HP
-from .BRNNEncoder import BidirectionalLSTM
+import keras.backend as K
+from HyperParameters import HP
 import math as m
 
 def sampling(args):
@@ -19,20 +17,23 @@ def sampling(args):
         z (tensor): sampled latent vector
     """
     z_mean, z_log_var = args
-    batch = K.shape(z_mean)[0]
+    batch = tf.shape(z_mean)[0]
     dim = K.int_shape(z_mean)[1]
     # by default, random_normal has mean=0 and std=1.0
-    epsilon = K.random_normal(shape=(batch, dim))
+    epsilon = tf.random.normal(shape=(batch, dim))
     return z_mean + K.exp(0.5 * z_log_var) * epsilon
 
 class VAE():
     def __init__(self):
         self.build_model()
-        self.optimizer = tf.keras.optimizers.Adam(lt = HP.lr, clipvalue= HP.grad_clip, decay = HP.lr_decay, epsilon = HP.min_lr)
+        # initial weight for kl divergence
+        self.KL_weight = HP.wKL
+        # optimizer 
+        self.optimizer = tf.keras.optimizers.Adam(lr = HP.lr, clipvalue= HP.grad_clip, decay = HP.lr_decay, epsilon = HP.min_lr)
     
     def build_model(self):
         # build the encoder
-        encoderInput = tf.keras.layers.Input(shape = (HP.input_dimention, HP.max_seq_length), batch_size = HP.batch_size, name = "encoder Input" )
+        encoderInput = tf.keras.layers.Input(shape = (HP.max_seq_length, HP.input_dimention), batch_size = HP.batch_size, name = "encoder_Input" )
         encoderLSTM = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(HP.enc_hidden_size, return_sequences=False,
          recurrent_dropout=HP.rec_dropout), merge_mode='concat')(encoderInput)
         self.mu = tf.keras.layers.Dense(HP.latent_dim, activation='linear')(encoderLSTM)
@@ -42,32 +43,37 @@ class VAE():
         # create the model 
         self.encoder = tf.keras.models.Model(encoderInput, [self.mu, self.sigma, z], name='encoder')
         self.encoder.summary()
-        tf.keras.utils.plot_model(self.encoder, to_file='vae_mlp_encoder.png', show_shapes=True)
+        #tf.keras.utils.plot_model(self.encoder, to_file='vae_mlp_encoder.png', show_shapes=True)
+
+        ' DECODER '
         # now create the decoder
         # input creation
-        inputSequence = tf.keras.layers.Input(shape = (HP.input_dimention, HP.max_seq_length), batch_size = HP.batch_size, name = "Decoder Sequence Input" )
-        # we have the latent variable as input of the 
+        # sequence as input of the LSTM
+        decoder_input_sequence = tf.keras.layers.Input(shape = (HP.max_seq_length, HP.input_dimention), batch_size = HP.batch_size, name = "Decoder_Sequence_Input" )
+        # we have also the latent variable as input of the LSTM with the sequence
         inputLatentVariable = tf.keras.layers.RepeatVector(HP.max_seq_length)(z)
+        # so we concatentate the two vector
         # as input we have the two vector above concatenated
-        totalInput = tf.concat((inputSequence, inputLatentVariable), 0)
+        totalInput = tf.keras.layers.Concatenate()([decoder_input_sequence, inputLatentVariable])
+        
+
         # Create LSTM for generation with input state = tanh(z)
-        init_state = tf.keras.layers.Dense(units=2*HP.dec_hidden_size, activation='tanh')(z)
-        h_0, c_0 = (init_state[:, :HP.dec_hidden_size], init_state[:, HP.dec_hidden_size:])
         decoderLSTM = tf.keras.layers.LSTM(HP.dec_hidden_size, recurrent_dropout=HP.rec_dropout, return_sequences=True, return_state=True)
-        decoder_output = decoderLSTM(totalInput, initial_state = [h_0, c_0])
+        #
+        init_state = tf.keras.layers.Dense(units=(2*decoderLSTM.units), activation='tanh', name = "decoder_init_stat")(z)
+        h_0, c_0 = tf.split(init_state, num_or_size_splits=2, axis = 1)
+        # creation of the LSTM
+        decoder_output, _, _ = decoderLSTM(totalInput, initial_state = [h_0, c_0])
+
         # dense to output. THe dimention is, as explained in the paper equale to 3 + 
         # 6 times M= number of mixture 
         outputDimention = (3 + HP.M * 6)
         distributionOutput = tf.keras.layers.Dense(outputDimention)(decoder_output)
 
-        # Build Keras models
-        self.decoder = tf.keras.models.Model(totalInput, distributionOutput)
-        self.decoder.summary()
-        tf.keras.utils.plot_model(self.decoder, to_file='vae_mlp_encoder.png', show_shapes=True)
-        # Build general model
-        self.totalModel = tf.keras.models.Model([encoderInput, totalInput], distributionOutput)
+        # Build Keras model
+        self.totalModel = tf.keras.models.Model([encoderInput, decoder_input_sequence], distributionOutput)
         self.totalModel.summary()
-        tf.keras.utils.plot_model(self.totalModel, to_file='vae_mlp_encoder.png', show_shapes=True)
+        #tf.keras.utils.plot_model(self.totalModel, to_file='vae_mlp_encoder.png', show_shapes=True)
     
     def kl_loss(self, *args, **kwargs):
         # kl loss. 
@@ -78,7 +84,7 @@ class VAE():
     def reconstruction_loss(self, y_true, output):
         # reconstruction loss. More complicated loss: 
         # 1. obtain the parameters for the distribution
-        q, pi, mux, muy, sigmax, sigmay, ro = self.create_output_distribution(output)
+        q, pi, mux, muy, sigmax, sigmay, ro = self.find_distribution_parameter(output)
         # 2. find posterior for each mixture
         # 2.1 but first find dx, dy, p1, p2, p3
         [dx, dy] = [y_true[:, :, 0], y_true[:, :, 1]]
@@ -103,7 +109,7 @@ class VAE():
         def my_loss(y_true, y_predicted):
             model_loss = reconstruction_loss(y_true, y_predicted)
             # wheight kl model_loss 
-            model_loss = HP.wKL*kl_loss + model_loss
+            model_loss = self.KL_weight*kl_loss + model_loss
             return model_loss
         return my_loss
 
@@ -143,5 +149,6 @@ class VAE():
     def compile(self):
         self.totalModel.compile(optimizer=self.optimizer, loss=self.total_loss,
                            metrics=[self.reconstruction_loss, self.kl_loss])
+
 
 
