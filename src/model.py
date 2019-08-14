@@ -25,9 +25,7 @@ def sampling(args):
 
 class VAE():
     def __init__(self):
-        self.build_model()
-        # initial weight for kl divergence
-        self.KL_weight = HP.wKL
+        self.build_model()  
         # optimizer 
         self.optimizer = tf.keras.optimizers.Adam(lr = HP.lr, clipvalue= HP.grad_clip, decay = HP.lr_decay, epsilon = HP.min_lr)
     
@@ -105,12 +103,13 @@ class VAE():
 
     def total_loss(self):
         kl_loss = self.kl_loss
+        self.KL_weight = tf.Variable(HP.wKL, name='kl_weight')
         reconstruction_loss = self.reconstruction_loss
         def my_loss(y_true, y_predicted):
             model_loss = reconstruction_loss(y_true, y_predicted)
             # wheight kl model_loss 
-            model_loss = self.KL_weight*kl_loss + model_loss
-            return model_loss
+            total_model_loss = self.KL_weight*kl_loss + model_loss
+            return total_model_loss
         return my_loss
 
 

@@ -63,6 +63,8 @@ class Data():
             data.append(new_seq)
       return data
 
+
+# see https://keras.io/utils/ for more info
 class DataGenerator(tf.keras.utils.Sequence):
     'Generates data for Keras'
     def __init__(self, Data, shuffle=True):
@@ -94,4 +96,18 @@ class DataGenerator(tf.keras.utils.Sequence):
       for data in strokes:
         data[:,1] = data[:,1]*randomx
         data[:,2] = data[:,2]*randomy
-      return data
+      return data     
+
+class changing_KL_wheight(tf.keras.Callback):
+    def __init__(self, param, verbose = 1, mu_min = 0.01):
+        super(Callback, self).__init__()
+        self.verbose = verbose
+        self.mu_min = mu_min
+        self.curr_mu = 0
+        self.steps = 0
+
+    def on_epoch_end(self, epochs, logs = {}):
+        self.curr_mu = 1 - (1-self.mu_min)*HP.R**self.steps
+        New_wheight_kl = self.curr_mu*HP.wKL
+        tf.keras.backend.set_value(self.KL_weight, New_wheight_kl)
+        self.steps += 1
