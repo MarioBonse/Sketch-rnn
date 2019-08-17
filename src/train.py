@@ -76,7 +76,7 @@ seq_to_seq_VAE.summary()
 plot_model(seq_to_seq_VAE, to_file='vae.png', show_shapes=True)
 
 optimizer = Adam(lr = HP.lr, clipvalue= HP.grad_clip, 
-                decay = HP.lr_decay, epsilon= = HP.min_lr)
+                decay = HP.lr_decay, epsilon = HP.min_lr)
 
 reconstruction_loss = tu.reconstruction_loss(encoder_input, distribution_output)
 kl_loss = tu.kl_loss(hidden_state_mean, hidden_state_variance)
