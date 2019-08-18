@@ -5,7 +5,6 @@ import numpy as np
 from HyperParameters import HP
 import tensorflow as tf
 import keras
-from keras.utils import Sequence
 import keras.backend as K
 from keras.callbacks import Callback
 
@@ -76,7 +75,7 @@ class Data():
 
 
 # see https://keras.io/utils/ for more info
-class DataGenerator(Sequence):
+class DataGenerator(tf.keras.utils.Sequence):
     'Generates data for Keras'
     def __init__(self, Data, shuffle=True):
         'Initialization'
@@ -115,14 +114,19 @@ class DataGenerator(Sequence):
         return strokes     
 
 class changing_KL_wheight(Callback):
-    def __init__(self, verbose = 1, mu_min = 0.01):
+    def __init__(self, kl_weight, verbose = 1, mu_min = 0.01):
         super(Callback, self).__init__()
+        self.kl_wheight = kl_weight
         self.verbose = verbose
         self.curr_mu = 0
-        self.steps = 0
 
-    def on_epoch_start(self, epochs, logs = {}):
-        self.curr_mu = 1 - (1-HP.eta_min)*HP.R**self.steps
+    def on_epoch_begin(self, epochs, logs = {}):
+        self.curr_mu = 1 - (1-HP.eta_min)*HP.R**epochs
         New_wheight_kl = (self.curr_mu)*HP.wKL
-        K.set_value(KL_weight, New_wheight_kl)
-        self.steps += 1
+        self.kl_wheight.assign(New_wheight_kl)
+
+    def on_train_batch_begin(self, epochs, logs = {}):
+        pass
+
+    def on_train_batch_end(self, epochs, logs = {}):
+        pass
