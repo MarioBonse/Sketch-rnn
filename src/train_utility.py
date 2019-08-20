@@ -87,15 +87,19 @@ def misturegaussian(dx, dy, mux, muy, sigmax, sigmay, ro):
     return mixture_final
         
     
-def find_distribution_parameter(output):
+def find_distribution_parameter(output, temperature = 1):
     # the raw output has to be divided into the the distribution parameters.
     # they also have to be normalized
     # 3 parameters for the pen state 
     logit = output[:,:,:3]
+    logit = logit/temperature
     # now we have 6 parameter for each gaussian
     distribution_parameter = [output[:, :, (3 + HP.M * (n - 1)):(3 + HP.M * n)] for n in range(1, 7)]
     # now divide them 
     [pi, mux, muy, sigmax, sigmay, ro] = distribution_parameter
+    pi = pi/ temperature
+    sigmax = sigmax*temperature
+    sigmay = sigmay*temperature
     # normalize
     # sigma > 0 -> exp(sigma)
     sigmax = tf.math.exp(sigmax)

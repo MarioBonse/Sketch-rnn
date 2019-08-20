@@ -11,10 +11,10 @@ from keras.callbacks import Callback
 
 class Data():
     # managing the data
-    def __init__(self):
+    def __init__(self, size = None):
         'Initialization'
         # first load the data
-        self.loadData()
+        self.loadData(size)
         self.dim = HP.input_dimention
         self.batch_size = HP.batch_size
         self.train = self.purify(self.train)
@@ -28,15 +28,22 @@ class Data():
         self.test = np.array(self.test)
     
 
-    def loadData(self):  
+    def loadData(self, size):  
         try:
             npzFile = np.load(HP.data_location, allow_pickle=True, encoding='latin1')
         except:
             npzFile = np.load("../"+HP.data_location, allow_pickle=True, encoding='latin1')
-        self.train = npzFile['train']
+        train = npzFile['train']
+        if size:
+            self.train = np.copy(train[:size])
+        else:
+            self.train = train
         self.trainDimention = len(self.train)
+        
         self.test = npzFile['test']
+        
         self.valid = npzFile['valid']
+        self.validationDimention = len(self.valid)
         return self.train, self.valid, self.test
 
     # Normalize input Dx, Dy. We only remove the std as explained in the paper
@@ -77,30 +84,33 @@ class Data():
 # see https://keras.io/utils/ for more info
 class DataGenerator(tf.keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, Data, shuffle=True):
+    def __init__(self, Data, shuffle=True, validation = False):
         'Initialization'
         self.Data = Data
+        self.validation = validation
+        self.batch_size = HP.batch_size
+        self.dimention = len(Data)
         self.shuffle = shuffle
         self.on_epoch_end()
 
     def __len__(self):
-        'Denotes the number of batches per epoch'
-        return int(np.floor((self.Data.trainDimention) / self.Data.batch_size))
+        'Denotes the number of batches per epoch'    
+        return int(np.floor(self.dimention/ self.batch_size))
 
     def __getitem__(self, index):
         'Generate one batch of data'
         # Generate indexes of the batch
-        indexes = self.indexes[index*self.Data.batch_size:(index+1)*self.Data.batch_size]
-        encoder_input = self.Data.train[indexes]
-        decoder_ipnut = np.zeros(shape=encoder_input.shape)
-        decoder_ipnut[:,1:] = decoder_ipnut[:,:-1]
-        decoder_ipnut[:,0] = np.array([0,0,1,0,0])
-        encoder_input = self.dataAugmentation(encoder_input)
+        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+        encoder_input = self.Data[indexes]
+        if not self.validation:
+            encoder_input = self.dataAugmentation(encoder_input)
+        decoder_ipnut = create_decoder_input(encoder_input)
+        
         return [encoder_input, decoder_ipnut], []
 
     def on_epoch_end(self):
         'Updates indexes after each epoch'
-        self.indexes = np.arange(self.Data.trainDimention)
+        self.indexes = np.arange(self.dimention)
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
@@ -112,6 +122,21 @@ class DataGenerator(tf.keras.utils.Sequence):
         strokes[:,:,0] = strokes[:,:,0]*randomx
         strokes[:,:,1] = strokes[:,:,1]*randomy
         return strokes     
+
+def create_decoder_input(sequence):
+    """
+    function that, given an input sequence returns another sequence 
+    for the decoder. 
+    It shift the old sequence by one and insert on head the value
+    (0,0,1,0,0)
+    """
+    decoder_ipnut = np.zeros(shape=sequence.shape)
+    # copy the value of the sequence
+    decoder_ipnut[:,1:] = sequence[:,:-1]
+    decoder_ipnut[:,0] = np.array([0,0,1,0,0])
+
+    return decoder_ipnut
+        
 
 class changing_KL_wheight(Callback):
     def __init__(self, kl_weight, verbose = 1, mu_min = 0.01):
@@ -129,4 +154,10 @@ class changing_KL_wheight(Callback):
         pass
 
     def on_train_batch_end(self, epochs, logs = {}):
+        pass
+
+    def on_test_begin(self, epochs, logs = {}):
+        pass
+
+    def on_test_end(self, epochs, logs = {}):
         pass

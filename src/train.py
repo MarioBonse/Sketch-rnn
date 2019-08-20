@@ -10,12 +10,13 @@ import tensorflow as tf
 KL_weight = tf.Variable(HP.wKL, name='kl_weight')
 KL_wheight_schedule = data_Manager.changing_KL_wheight(KL_weight)
 
-checkpointer = tf.keras.callbacks.ModelCheckpoint(filepath='/tmp/weights.hdf5', verbose=1, save_best_only=True)
+checkpointer = tf.keras.callbacks.ModelCheckpoint(filepath='/tmp/weights.hdf5', verbose=1)
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="log")
 # import data
-datas = data_Manager.Data()
+datas = data_Manager.Data(size = 1000)
 # create the callback for data augmentaion during training
-train_generator = data_Manager.DataGenerator(datas)
+train_generator = data_Manager.DataGenerator(datas.train)
+valid_generator = data_Manager.DataGenerator(datas.valid, validation = True)
 
 
 """
@@ -82,10 +83,16 @@ seq_to_seq_VAE.compile(optimizer=optimizer)
 """
 FIT
 """
-history = seq_to_seq_VAE.fit_generator(train_generator,steps_per_epoch=(datas.trainDimention)/HP.epochs, 
-                                epochs=HP.epochs, callbacks=[KL_wheight_schedule, checkpointer, tensorboard_callback])
 
-#history = seq_to_seq_VAE.fit(datas.train, datas.train , epochs=HP.epochs)
+validation_encoder = datas.valid
+validation_decoder = data_Manager.create_decoder_input(validation_encoder)
+
+vaidation = [validation_encoder, validation_decoder]
+history = seq_to_seq_VAE.fit_generator(train_generator
+                                ,steps_per_epoch=(datas.trainDimention)/HP.batch_size, 
+                                epochs=HP.epochs, callbacks=[KL_wheight_schedule, checkpointer, tensorboard_callback])
+# save the model
+seq_to_seq_VAE.save(HP.model_folder+HP.model_name)
 
 
 

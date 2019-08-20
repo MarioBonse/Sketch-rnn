@@ -1,6 +1,9 @@
 
 class hyper_parameters():
     def __init__(self):
+        # model location fodler
+        self.model_folder = "model/"
+        self.model_name = "sketch-RNN.h5"
         # Location of the data and name of the file
         # name = sketchrnn_airplane.full.npz
         self.data_folder = "data/"
@@ -25,7 +28,7 @@ class hyper_parameters():
         self.grad_clip = 1.
         self.temperature = 0.4
         self.max_seq_length = 200
-        self.epochs = 100
+        self.epochs = 1
 
 
 HP = hyper_parameters()
