@@ -7,8 +7,7 @@ import tensorflow as tf
 
 # callback and data control
 # callback that change the weight of the kl loss 
-KL_weight = tf.Variable(HP.wKL, name='kl_weight')
-KL_wheight_schedule = data_Manager.changing_KL_wheight(KL_weight)
+
 
 checkpointer = tf.keras.callbacks.ModelCheckpoint(filepath='/tmp/weights.hdf5', verbose=1)
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="log")
@@ -72,6 +71,13 @@ tf.keras.utils.plot_model(seq_to_seq_VAE, to_file='vae.png', show_shapes=True)
 optimizer = tf.keras.optimizers.Adam(lr = HP.lr, clipvalue= HP.grad_clip, 
                 decay = HP.lr_decay, epsilon = HP.min_lr)
 
+# variable for the weight of kl divergece
+#if I use tf2:0 -> KL_weight = tf.Variable(HP.wKL, name='kl_weight')
+KL_weight = tf.keras.backend.variable(HP.wKL, name='kl_weight')
+KL_weight.assign(0)
+KL_wheight_schedule = data_Manager.changing_KL_wheight(KL_weight)
+
+
 reconstruction_loss = tu.reconstruction_loss(encoder_input, distribution_output)
 kl_loss = tu.kl_loss(hidden_state_mean, hidden_state_variance)
 
@@ -90,9 +96,10 @@ validation_decoder = data_Manager.create_decoder_input(validation_encoder)
 vaidation = [validation_encoder, validation_decoder]
 history = seq_to_seq_VAE.fit_generator(train_generator
                                 ,steps_per_epoch=(datas.trainDimention)/HP.batch_size, 
-                                epochs=HP.epochs, callbacks=[KL_wheight_schedule, checkpointer, tensorboard_callback])
+                                epochs=HP.epochs, callbacks=[KL_wheight_schedule, tensorboard_callback])
 # save the model
-seq_to_seq_VAE.save(HP.model_folder+HP.model_name)
+seq_to_seq_VAE.save_weights("model_weight.h5")
+seq_to_seq_VAE.save("model.h5")
 
 
 

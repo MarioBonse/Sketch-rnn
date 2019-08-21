@@ -19,7 +19,7 @@ def sampling(args):
     """
     z_mean, z_log_var = args
     batch = HP.batch_size
-    dim = z_mean.shape[1]
+    dim = HP.latent_dim
     # by default, random_normal has mean=0 and std=1.0
     epsilon = tf.random.normal(shape=(batch, dim))
     return z_mean + tf.math.exp(0.5 * z_log_var) * epsilon
@@ -51,7 +51,9 @@ def reconstruction_loss(y_true, output):
     
     #############################################
     # Now the loss due to the pen state. Classical cross entropy
-    L_p = tf.losses.categorical_crossentropy(penstates, q)
+    p_k_dot_log_q_k = tf.math.reduce_sum(penstates*tf.math.log(q + epsilon), axis = 2)
+    L_p = p_k_dot_log_q_k
+    #L_p = tf.losses.categorical_crossentropy(penstates, q)
     L_p = tf.expand_dims(L_p, -1)
     L_r = L_s + L_p
     L_r = tf.reduce_mean(L_r)

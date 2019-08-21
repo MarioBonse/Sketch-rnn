@@ -46,7 +46,59 @@ class Data():
         self.validationDimention = len(self.valid)
         return self.train, self.valid, self.test
 
-    # Normalize input Dx, Dy. We only remove the std as explained in the paper
+    def calculate_normalizing_scale_factor(self, strokes):
+        """Calculate the normalizing factor explained in appendix of sketch-rnn."""
+        data = []
+        for i in range(len(strokes)):
+            if len(strokes[i]) > HP.max_seq_length:
+                continue
+            for j in range(len(strokes[i])):
+                data.append(strokes[i][j, 0])
+                data.append(strokes[i][j, 1])
+        data = np.array(data)
+        return np.std(data)
+
+    def normalize(self, strokes,  scale_factor=None):
+        """Normalize entire dataset (delta_x, delta_y) by the scaling factor."""
+        if scale_factor is None:
+            scale_factor = self.calculate_normalizing_scale_factor(strokes)
+        self.scale_factor = scale_factor
+        for i in range(len(strokes)):
+            strokes[i][:, 0:2] /= self.scale_factor
+        return strokes
+
+    def purify(self, strokes):
+        # We have to remove too long sequence 
+        data = []
+        for seq in strokes:
+            if seq.shape[0] <= HP.max_seq_length:
+                len_seq = len(seq[:,0])
+                # pen state made by 3 state
+                new_seq = np.zeros((HP.max_seq_length,5))
+                new_seq[:len_seq,:2] = seq[:,:2]
+                new_seq[:len_seq-1,2] = 1-seq[:-1,2]
+                new_seq[:len_seq,3] = seq[:,2]
+                new_seq[len_seq:,4] = 1
+                data.append(new_seq)
+        return data
+
+
+
+def to_normal_strokes(big_stroke):
+    """Convert from stroke-5 format to stroke-3."""
+    l = 0
+    for i in range(len(big_stroke)):
+        if big_stroke[i, 4] > 0:
+            l = i
+            break
+    if l == 0:
+        l = len(big_stroke)
+    result = np.zeros((l, 3))
+    result[:, 0:2] = big_stroke[0:l, 0:2]
+    result[:, 2] = big_stroke[0:l, 3]
+    return result
+
+"""    # Normalize input Dx, Dy. We only remove the std as explained in the paper
     def calculate_normalizing_scale_factor(self, strokes):
       data = []
       for element in strokes:
@@ -62,23 +114,8 @@ class Data():
             seq[:, 0:1] /= scale_factor
             data.append(seq)
         return data
+"""
 
-    def purify(self, strokes):
-        # We have to remove too long sequence 
-        data = []
-        for seq in strokes:
-            if seq.shape[0] <= HP.max_seq_length:
-                len_seq = len(seq[:,0])
-                # pen state made by 3 state
-                new_seq = np.zeros((HP.max_seq_length,5))
-                new_seq[:len_seq,:2] = seq[:,:2]
-                new_seq[:len_seq-1,2] = 1-seq[:-1,2]
-                new_seq[:len_seq,3] = seq[:,2]
-                new_seq[(len_seq-1):,4] = 1
-                new_seq[len_seq-1,2:4] = 0
-                new_seq[len_seq-1,4] = 1
-                data.append(new_seq)
-        return data
 
 
 # see https://keras.io/utils/ for more info
@@ -148,7 +185,10 @@ class changing_KL_wheight(Callback):
     def on_epoch_begin(self, epochs, logs = {}):
         self.curr_mu = 1 - (1-HP.eta_min)*HP.R**epochs
         New_wheight_kl = (self.curr_mu)*HP.wKL
-        self.kl_wheight.assign(New_wheight_kl)
+        # IF I USE TF-2.0 then I have to update the variable like that
+        # self.kl_wheight.assign(New_wheight_kl)
+        tf.keras.backend.set_value(self.kl_wheight, New_wheight_kl)
+
 
     def on_train_batch_begin(self, epochs, logs = {}):
         pass
