@@ -7,6 +7,7 @@ import keras.backend as K
 from HyperParameters import HP
 import math as m
 import sys
+import random
 
 def sampling(args):
     """Reparameterization trick by sampling fr an isotropic unit Gaussian.
@@ -38,8 +39,8 @@ def reconstruction_loss(y_true, output):
     # 2. find posterior for each mixture
     # 2.1 but first find dx, dy, p1, p2, p3 
     [dx, dy] = [y_true[:, :, 0], y_true[:, :, 1]]
-    # we have to stack the value for each 
-    penstates = y_true[:,:,2:5]
+    penstates = y_true[:,:,2:]
+
     mixture_posterior = misturegaussian(dx, dy, mux, muy, sigmax, sigmay, ro)
     # now we can obtgain the likelihood of the gaussian
     # first multiply by the Pi terms
@@ -48,13 +49,13 @@ def reconstruction_loss(y_true, output):
     # the loss due the dx, dy 
     # [100, 200, 1]
     L_s = -tf.math.log(tf.math.reduce_sum(mixture_posterior_weighted, 2, keepdims=True) + epsilon )
-    
+    # create a vector equal to zero where the strokes end
+    zero_after_end = tf.expand_dims(1. - penstates[:,:,2], -1)
+
+    L_s = L_s * zero_after_end
     #############################################
     # Now the loss due to the pen state. Classical cross entropy
-    p_k_dot_log_q_k = tf.math.reduce_sum(penstates*tf.math.log(q + epsilon), axis = 2)
-    L_p = p_k_dot_log_q_k
-    #L_p = tf.losses.categorical_crossentropy(penstates, q)
-    L_p = tf.expand_dims(L_p, -1)
+    L_p = -tf.math.reduce_sum(penstates*tf.math.log(q + epsilon), axis = 2, keepdims=True)
     L_r = L_s + L_p
     L_r = tf.reduce_mean(L_r)
     #L_r = tf.print_tensor(L_r, message='L_r = ')
@@ -89,19 +90,15 @@ def misturegaussian(dx, dy, mux, muy, sigmax, sigmay, ro):
     return mixture_final
         
     
-def find_distribution_parameter(output, temperature = 1):
+def find_distribution_parameter(output):
     # the raw output has to be divided into the the distribution parameters.
     # they also have to be normalized
     # 3 parameters for the pen state 
     logit = output[:,:,:3]
-    logit = logit/temperature
     # now we have 6 parameter for each gaussian
     distribution_parameter = [output[:, :, (3 + HP.M * (n - 1)):(3 + HP.M * n)] for n in range(1, 7)]
     # now divide them 
     [pi, mux, muy, sigmax, sigmay, ro] = distribution_parameter
-    pi = pi/ temperature
-    sigmax = sigmax*temperature
-    sigmay = sigmay*temperature
     # normalize
     # sigma > 0 -> exp(sigma)
     sigmax = tf.math.exp(sigmax)
@@ -113,5 +110,6 @@ def find_distribution_parameter(output, temperature = 1):
     logit = tf.math.softmax(logit)
     return logit, pi, mux, muy, sigmax, sigmay, ro
     
+
 
 

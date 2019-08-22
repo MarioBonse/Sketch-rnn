@@ -15,7 +15,7 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="log")
 datas = data_Manager.Data(size = 1000)
 # create the callback for data augmentaion during training
 train_generator = data_Manager.DataGenerator(datas.train)
-valid_generator = data_Manager.DataGenerator(datas.valid, validation = True)
+valid_generator = data_Manager.DataGenerator(datas.valid, validation = True, shuffle = True)
 
 
 """
@@ -94,9 +94,10 @@ validation_encoder = datas.valid
 validation_decoder = data_Manager.create_decoder_input(validation_encoder)
 
 vaidation = [validation_encoder, validation_decoder]
-history = seq_to_seq_VAE.fit_generator(train_generator
-                                ,steps_per_epoch=(datas.trainDimention)/HP.batch_size, 
-                                epochs=HP.epochs, callbacks=[KL_wheight_schedule, tensorboard_callback])
+history = seq_to_seq_VAE.fit_generator(train_generator,
+            validation_data= ([validation_encoder, validation_decoder],[]),
+                        steps_per_epoch=(datas.trainDimention)/HP.batch_size, 
+                        epochs=HP.epochs, callbacks=[KL_wheight_schedule, tensorboard_callback])
 # save the model
 seq_to_seq_VAE.save_weights("model_weight.h5")
 seq_to_seq_VAE.save("model.h5")

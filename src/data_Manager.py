@@ -125,13 +125,18 @@ class DataGenerator(tf.keras.utils.Sequence):
         'Initialization'
         self.Data = Data
         self.validation = validation
-        self.batch_size = HP.batch_size
+        if validation:
+            self.batch_size = len(Data)
+        else:
+            self.batch_size = HP.batch_size
         self.dimention = len(Data)
         self.shuffle = shuffle
         self.on_epoch_end()
 
     def __len__(self):
-        'Denotes the number of batches per epoch'    
+        'Denotes the number of batches per epoch'
+        if self.validation:
+            return 1    
         return int(np.floor(self.dimention/ self.batch_size))
 
     def __getitem__(self, index):
@@ -196,8 +201,14 @@ class changing_KL_wheight(Callback):
     def on_train_batch_end(self, epochs, logs = {}):
         pass
 
-    def on_test_begin(self, epochs, logs = {}):
+    def on_test_batch_begin(self, epochs, logs = {}):
         pass
 
-    def on_test_end(self, epochs, logs = {}):
+    def on_test_batch_end(self, epochs, logs = {}):
+        pass
+    
+    def on_test_begin(self, *arg, **karg):
+        pass
+
+    def on_test_end(self, *arg, **karg):
         pass
