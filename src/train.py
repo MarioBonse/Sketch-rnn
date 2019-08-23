@@ -22,14 +22,14 @@ valid_generator = data_Manager.DataGenerator(datas.valid, validation = True, shu
 Create the model
 """
 # build the encoder
-encoder_input = tf.keras.layers.Input(batch_shape = (HP.batch_size, HP.max_seq_length, HP.input_dimention), name = "encoder_input" )
+encoder_input = tf.keras.layers.Input(batch_shape = (HP.batch_size, None, HP.input_dimention), name = "encoder_input" )
 
 encoderLSTM = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(HP.enc_hidden_size, return_sequences=False,
-    recurrent_dropout=HP.rec_dropout), merge_mode='concat')(encoder_input)
+    recurrent_dropout=HP.rec_dropout, name = "LSTM_encoder"), merge_mode='concat', name = "BI_LSTM_encoder")(encoder_input)
 
-hidden_state_mean = tf.keras.layers.Dense(HP.latent_dim, activation='linear')(encoderLSTM)
+hidden_state_mean = tf.keras.layers.Dense(HP.latent_dim, activation='linear', name = "mean_MLP")(encoderLSTM)
 
-hidden_state_variance = tf.keras.layers.Dense(HP.latent_dim, activation='linear')(encoderLSTM)
+hidden_state_variance = tf.keras.layers.Dense(HP.latent_dim, activation='linear', name = "variance_MLP")(encoderLSTM)
 
 # latent vaiable z 
 z = tf.keras.layers.Lambda(tu.sampling, output_shape=(HP.latent_dim,), name='z')([hidden_state_mean, hidden_state_variance])

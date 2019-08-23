@@ -56,7 +56,7 @@ def generate_sketch(decoder, initial_state_net, latent_variable = None, temperat
     starting_point = np.zeros((1,5))
     starting_point[0,2] = 1
     previous_point = starting_point
-    if latent_variable == None:
+    if latent_variable is None:
         latent_variable = np.random.rand(1,HP.latent_dim)
     initial_state = initial_state_net.predict(latent_variable)
     h_0, c_0 = tf.split(initial_state, num_or_size_splits=2, axis = 1)
