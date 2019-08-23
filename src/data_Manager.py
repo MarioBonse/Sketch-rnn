@@ -17,9 +17,9 @@ class Data():
         self.loadData(size)
         self.dim = HP.input_dimention
         self.batch_size = HP.batch_size
-        self.train = self.purify(self.train)
-        self.valid = self.purify(self.valid)
-        self.test = self.purify(self.test)
+        self.train = purify(self.train)
+        self.valid = purify(self.valid)
+        self.test = purify(self.test)
         self.train = self.normalize(self.train)
         self.valid = self.normalize(self.valid)
         self.test = self.normalize(self.test)
@@ -67,20 +67,20 @@ class Data():
             strokes[i][:, 0:2] /= self.scale_factor
         return strokes
 
-    def purify(self, strokes):
-        # We have to remove too long sequence 
-        data = []
-        for seq in strokes:
-            if seq.shape[0] <= HP.max_seq_length:
-                len_seq = len(seq[:,0])
-                # pen state made by 3 state
-                new_seq = np.zeros((HP.max_seq_length,5))
-                new_seq[:len_seq,:2] = seq[:,:2]
-                new_seq[:len_seq-1,2] = 1-seq[:-1,2]
-                new_seq[:len_seq,3] = seq[:,2]
-                new_seq[len_seq:,4] = 1
-                data.append(new_seq)
-        return data
+def purify(strokes):
+    # We have to remove too long sequence 
+    data = []
+    for seq in strokes:
+        if seq.shape[0] <= HP.max_seq_length:
+            len_seq = len(seq[:,0])
+            # pen state made by 3 state
+            new_seq = np.zeros((HP.max_seq_length,5))
+            new_seq[:len_seq,:2] = seq[:,:2]
+            new_seq[:len_seq-1,2] = 1-seq[:-1,2]
+            new_seq[:len_seq,3] = seq[:,2]
+            new_seq[len_seq:,4] = 1
+            data.append(new_seq)
+    return data
 
 
 
@@ -144,11 +144,19 @@ class DataGenerator(tf.keras.utils.Sequence):
         # Generate indexes of the batch
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
         encoder_input = self.Data[indexes]
-        if not self.validation:
-            encoder_input = self.dataAugmentation(encoder_input)
+        #if not self.validation:
+            #encoder_input = self.dataAugmentation(encoder_input)
         decoder_ipnut = create_decoder_input(encoder_input)
+        """
+        encoder_ipnut_short = []
+        for i in range(encoder_input.shape[0]):
+            for j in range(encoder_input.shape[1]):
+                if encoder_input[i,j,4] == 1:
+                    encoder_ipnut_short.append(np.copy(encoder_input[i, :j, :]))
+                    break
+        """
         
-        return [encoder_input, decoder_ipnut], []
+        return [encoder_input, decoder_ipnut], [encoder_input]
 
     def on_epoch_end(self):
         'Updates indexes after each epoch'
@@ -191,8 +199,8 @@ class changing_KL_wheight(Callback):
         self.curr_mu = 1 - (1-HP.eta_min)*HP.R**epochs
         New_wheight_kl = (self.curr_mu)*HP.wKL
         # IF I USE TF-2.0 then I have to update the variable like that
-        # self.kl_wheight.assign(New_wheight_kl)
-        tf.keras.backend.set_value(self.kl_wheight, New_wheight_kl)
+        self.kl_wheight.assign(New_wheight_kl)
+        #tf.keras.backend.set_value(self.kl_wheight, New_wheight_kl)
 
 
     def on_train_batch_begin(self, epochs, logs = {}):
