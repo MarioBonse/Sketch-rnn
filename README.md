@@ -10,7 +10,7 @@ I have trained the model with two different sketches:
 * Carrot 
 * Cat 
 ### This are e some example of sketch generated
-<div align="center">
+<div align="left">
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_latent.svg" />
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_latent.svg" />
 </div>
