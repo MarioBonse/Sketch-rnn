@@ -29,10 +29,7 @@ class Data():
     
 
     def loadData(self, size):  
-        try:
-            npzFile = np.load(HP.data_location, allow_pickle=True, encoding='latin1')
-        except:
-            npzFile = np.load("../"+HP.data_location, allow_pickle=True, encoding='latin1')
+        npzFile = np.load(HP.data_location, allow_pickle=True, encoding='latin1')
         train = npzFile['train']
         if size:
             self.train = np.copy(train[:size])
