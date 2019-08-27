@@ -9,13 +9,16 @@ I have created also a [colab notebook](https://github.com/MarioBonse/Sketch-rnn/
 I have trained the model with two different sketches:
 * Carrot 
 * Cat 
-### Example of skatches used for training of Cats and Carrots
+### Example of skatches from the *Quick, draw!* dataset:
+
+
 <div align="left">
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_1.svg" />
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_2.svg" />
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_3.svg" />
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_4.svg" />
 </div>
+
 <div align="left">
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_1.svg" />
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_2.svg" />
@@ -23,6 +26,7 @@ I have trained the model with two different sketches:
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_4.svg" />
 </div>
 ### Some sketch generated!
+
 #### Carrot where the hidden variable is sampled from the IID gaussian:
 <div align="left">
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_IID_1.svg" />
