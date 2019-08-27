@@ -1,5 +1,5 @@
 # Sketch-rnn
-On this project I implemented Sketch-rnn, a Variational Autoencoder for generating sketches. I followed 
+On this project I implemented, with tensorflow 2.0 and keras, Sketch-rnn, a Variational Autoencoder for generating sketches. I followed 
 [the original paper](https://arxiv.org/abs/1704.03477 "Sketch-RNN"). 
 ## Architecture
 The architecture is the following. 
