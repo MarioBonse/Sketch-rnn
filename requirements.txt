@@ -4,3 +4,4 @@ tensorflow==2.0.0-beta1
 pillow
 matplotlib
 ipython
+svgwrite
