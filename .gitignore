@@ -108,4 +108,8 @@ venv.bak/
 data/
 old/
 .vscode/
+<<<<<<< tf2.0
 log/
+=======
+log/
+>>>>>>> Update .gitignore.
