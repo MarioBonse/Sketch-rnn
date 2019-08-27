@@ -16,6 +16,7 @@ I have trained the model with two different sketches:
 </div>
 There is also a Jupyter notebook for testing the sampling. 
 We can sample from a hidden variable produced by the encoder or form a sample of a IID gaussian.
-The weights of the trained model are in the [model](https://github.com/MarioBonse/Sketch-rnn/blob/master/train_colab_notebook.ipynb) directory. 
+The weights of the trained model are in the 
+[model](https://github.com/MarioBonse/Sketch-rnn/blob/master/generator.ipynb) directory. 
 
 
