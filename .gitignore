@@ -104,12 +104,7 @@ venv.bak/
 .mypy_cache/
 
 # Data for training
-/data
-data/
 old/
 .vscode/
-<<<<<<< tf2.0
+
 log/
-=======
-log/
->>>>>>> Update .gitignore.
