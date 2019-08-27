@@ -9,22 +9,6 @@ I have created also a [colab notebook](https://github.com/MarioBonse/Sketch-rnn/
 I have trained the model with two different sketches:
 * Carrot 
 * Cat 
-### Example of skatches from the *Quick, draw!* dataset:
-
-
-<div align="left">
-<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_1.svg" />
-<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_2.svg" />
-  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_3.svg" />
-  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_4.svg" />
-</div>
-
-<div align="left">
-<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_1.svg" />
-<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_2.svg" />
-  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_3.svg" />
-  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_4.svg" />
-</div>
 ### Some sketch generated!
 
 #### Carrot where the hidden variable is sampled from the IID gaussian:
@@ -35,7 +19,7 @@ I have trained the model with two different sketches:
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_IID_4.svg" />
 </div>
 
-### Carrot where the latent variable is encoded from a sketch
+#### Carrot where the latent variable is encoded from a sketch
 
 <div align="left">
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_sketch_latent_1.svg" />
@@ -52,13 +36,30 @@ I have trained the model with two different sketches:
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_IID_gaussian_4.svg" />
 </div>
 
-### Cat where the latent variable is encoded from a sketch
+#### Cat where the latent variable is encoded from a sketch
 
 <div align="left">
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_1.svg" />
 <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_2.svg" />
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_3.svg" />
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_4.svg" />
+</div>
+
+#### Example of skatches from the *Quick, draw!* dataset:
+
+
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_4.svg" />
+</div>
+
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_4.svg" />
 </div>
 
 There is also a 
