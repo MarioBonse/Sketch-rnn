@@ -15,7 +15,7 @@ I have trained the model with two different sketches:
   <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_latent.svg" />
 </div>
 There is also a 
-[Jupyter notebook](https://github.com/MarioBonse/Sketch-rnn/blob/master/generator.ipynb)
+[Jupyter notebook](https://github.com/MarioBonse/Sketch-rnn/blob/master/generator.ipynb "noteboook")
 for testing the sampling. 
 We can sample from a hidden variable produced by the encoder or form a sample of a IID gaussian.
 The weights of the trained model are in the model directory. 
