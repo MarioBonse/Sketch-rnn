@@ -9,11 +9,54 @@ I have created also a [colab notebook](https://github.com/MarioBonse/Sketch-rnn/
 I have trained the model with two different sketches:
 * Carrot 
 * Cat 
-### Some sketch generated!
+### Example of skatches used for training of Cats and Carrots
 <div align="left">
-<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_latent.svg" />
-  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_latent.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_original_4.svg" />
 </div>
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_original_4.svg" />
+</div>
+### Some sketch generated!
+#### Carrot where the hidden variable is sampled from the IID gaussian:
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_IID_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_IID_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_IID_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_IID_4.svg" />
+</div>
+
+### Carrot where the latent variable is encoded from a sketch
+
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_sketch_latent_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_sketch_latent_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_sketch_latent_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/carrot_from_sketch_latent_4.svg" />
+</div>
+
+#### Cat where the hidden variable is sampled from the IID gaussian:
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_IID_gaussian_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_IID_gaussian_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_IID_gaussian_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_IID_gaussian_4.svg" />
+</div>
+
+### Cat where the latent variable is encoded from a sketch
+
+<div align="left">
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_1.svg" />
+<img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_2.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_3.svg" />
+  <img src="https://github.com/MarioBonse/Sketch-rnn/blob/master/results/cat_from_sketch_latent_4.svg" />
+</div>
+
 There is also a 
 Jupyter notebook
 for testing the sampling. 
