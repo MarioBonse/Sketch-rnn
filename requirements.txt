@@ -1,6 +1,6 @@
 numpy
 keras
-tensorflow==2.0.0-beta1
+tensorflow==2.6.4
 pillow
 matplotlib
 ipython
